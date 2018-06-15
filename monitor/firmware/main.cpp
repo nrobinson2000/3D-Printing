@@ -48,6 +48,12 @@ if (printReading == HIGH && printState == LOW)
   printState = HIGH;
   Serial.print("ON: ");
   Serial.println(printState);
+
+  if (Particle.connected() && confirmState)
+  {
+    Particle.publish("print_finished", PRIVATE);
+  }
+
   softDelay(100);
 }
 else if (printReading == LOW && printState == HIGH)
@@ -55,12 +61,6 @@ else if (printReading == LOW && printState == HIGH)
   printState = LOW;
   Serial.print("OFF: ");
   Serial.println(printState);
-
-  if (Particle.connected() && confirmState)
-  {
-    Particle.publish("print_finished", PRIVATE);
-  }
-
   softDelay(100);
 }
 

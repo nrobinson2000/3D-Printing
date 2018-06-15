@@ -3,15 +3,14 @@
 SYSTEM_MODE(SEMI_AUTOMATIC);
 SYSTEM_THREAD(ENABLED);
 
-#define PRINTER D0
+#define PRINTER D4
 #define CONFIRM A0
 
-inline void softDelay(uint32_t msDelay)
+/* inline void softDelay(uint32_t msDelay)
 {
         for (uint32_t ms = millis(); millis() - ms < msDelay; Particle.process());
-}
+} */
 
-bool printState = HIGH;
 bool confirmState = false;
 
 void setup() // Put setup code here to run once
@@ -21,7 +20,7 @@ void setup() // Put setup code here to run once
         pinMode(CONFIRM, INPUT_PULLUP);
 
         pinMode(D7, OUTPUT);
-        pinMode(D6, OUTPUT);
+        pinMode(A5, OUTPUT);
 
         Serial.begin(115200);
 
@@ -30,18 +29,40 @@ void setup() // Put setup code here to run once
 
 void loop() // Put code here to loop forever
 {
+        digitalWrite(A5, confirmState);
 
-        bool printReading = digitalRead(PRINTER);
-        bool confirmReading = digitalRead(CONFIRM);
-
-        digitalWrite(D7, !digitalRead(PRINTER));
-        digitalWrite(D6, confirmState);
-
-        if (confirmReading == LOW)
+        if (digitalRead(CONFIRM) == LOW)
         {
                 confirmState = !confirmState;
                 delay(250);
         }
+
+
+        if (digitalRead(PRINTER) == LOW && confirmState == true)
+        {
+          bool tempState = true;
+
+                if (Particle.connected() && confirmState == true)
+                {
+                        Serial.print("Button is: ");
+                        Serial.println(digitalRead(PRINTER));
+
+                        if (digitalRead(PRINTER) == LOW)
+                        {
+                          digitalWrite(D7, HIGH);
+                          Serial.println("Publishing...");
+                          Particle.publish("print-done", "good", PRIVATE);
+                          delay(3000);
+                          tempState = false;
+                        }
+
+
+                }
+                digitalWrite(D7, LOW);
+                confirmState = tempState;
+        }
+
+/*
 
         if (printReading == LOW && printState == HIGH)
         {
@@ -64,4 +85,6 @@ void loop() // Put code here to loop forever
                 Serial.println(printState);
                 delay(100);
         }
+
+ */
 }

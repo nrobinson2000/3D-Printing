@@ -8,60 +8,60 @@ SYSTEM_THREAD(ENABLED);
 
 inline void softDelay(uint32_t msDelay)
 {
-  for (uint32_t ms = millis(); millis() - ms < msDelay; Particle.process());
+        for (uint32_t ms = millis(); millis() - ms < msDelay; Particle.process());
 }
 
-bool printState = LOW;
-bool confirmState = LOW;
+bool printState = HIGH;
+bool confirmState = false;
 
 void setup() // Put setup code here to run once
 {
 
-pinMode(PRINTER, INPUT_PULLUP);
-pinMode(CONFIRM, INPUT_PULLUP);
+        pinMode(PRINTER, INPUT_PULLUP);
+        pinMode(CONFIRM, INPUT_PULLUP);
 
-pinMode(D7, OUTPUT);
-pinMode(D6, OUTPUT);
+        pinMode(D7, OUTPUT);
+        pinMode(D6, OUTPUT);
 
-Serial.begin(115200);
+        Serial.begin(115200);
 
-Particle.connect();
+        Particle.connect();
 }
 
 void loop() // Put code here to loop forever
 {
 
-bool printReading = !digitalRead(PRINTER);
-bool confirmReading = !digitalRead(CONFIRM);
+        bool printReading = digitalRead(PRINTER);
+        bool confirmReading = digitalRead(CONFIRM);
 
-digitalWrite(D7, !digitalRead(PRINTER));
+        digitalWrite(D7, !digitalRead(PRINTER));
+        digitalWrite(D6, confirmState);
 
-if (confirmReading == HIGH)
-{
-  confirmState = !confirmState;
-  digitalWrite(D6, confirmState);
-  softDelay(250);
-}
+        if (confirmReading == LOW)
+        {
+                confirmState = !confirmState;
+                delay(250);
+        }
 
-if (printReading == HIGH && printState == LOW)
-{
-  printState = HIGH;
-  Serial.print("ON: ");
-  Serial.println(printState);
+        if (printReading == LOW && printState == HIGH)
+        {
+                printState = LOW;
+                Serial.print("ON: ");
+                Serial.println(printState);
 
-  if (Particle.connected() && confirmState)
-  {
-    Particle.publish("print_finished", PRIVATE);
-  }
+                if (Particle.connected() && confirmState == true)
+                {
+                        Particle.publish("print_finished", "good", PRIVATE);
+                        confirmState = false;
+                }
 
-  softDelay(5000);
-}
-else if (printReading == LOW && printState == HIGH)
-{
-  printState = LOW;
-  Serial.print("OFF: ");
-  Serial.println(printState);
-  softDelay(100);
-}
-
+                delay(3000);
+        }
+        else if (printReading == HIGH && printState == LOW)
+        {
+                printState = HIGH;
+                Serial.print("OFF: ");
+                Serial.println(printState);
+                delay(100);
+        }
 }

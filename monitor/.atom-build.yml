@@ -1,0 +1,54 @@
+---
+cmd: po
+args:
+  - photon
+  - build
+sh: false
+
+targets:
+  Build:
+    atomCommandName: po:Build Particle Firmware Locally
+    sh: false
+    args:
+      - photon
+      - build
+    cmd: po
+    keymap: ctrl-alt-1
+    name: Build
+  Flash:
+    atomCommandName: po:Flash Particle Firmware Locally
+    sh: false
+    args:
+      - photon
+      - flash
+    cmd: po
+    keymap: ctrl-alt-2
+    name: Flash
+  Clean:
+    atomCommandName: po:Clean Particle Firmware Locally
+    sh: false
+    args:
+      - photon
+      - clean
+    cmd: po
+    keymap: ctrl-alt-3
+    name: Clean
+  DFU:
+    atomCommandName: po:Upload Particle Firmware Locally with DFU
+    sh: false
+    args:
+      - photon
+      - dfu
+    cmd: po
+    keymap: ctrl-alt-4
+    name: DFU
+  OTA:
+    atomCommandName: po:Upload Particle Firmware Locally with OTA
+    sh: false
+    args:
+      - photon
+      - ota
+      - --multi
+    cmd: po
+    keymap: ctrl-alt-5
+    name: OTA

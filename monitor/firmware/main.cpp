@@ -54,7 +54,7 @@ if (printReading == HIGH && printState == LOW)
     Particle.publish("print_finished", PRIVATE);
   }
 
-  softDelay(100);
+  softDelay(5000);
 }
 else if (printReading == LOW && printState == HIGH)
 {

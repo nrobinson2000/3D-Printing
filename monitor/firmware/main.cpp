@@ -3,24 +3,20 @@
 SYSTEM_MODE(SEMI_AUTOMATIC);
 SYSTEM_THREAD(ENABLED);
 
-#define PRINTER D4
-#define CONFIRM A0
-
-/* inline void softDelay(uint32_t msDelay)
-{
-        for (uint32_t ms = millis(); millis() - ms < msDelay; Particle.process());
-} */
+#define PRINTBED D4
+#define CONFIRMBTN A0
+#define CONFIRMLED A5
+#define PUBLISHLED D7
 
 bool confirmState = false;
 
 void setup() // Put setup code here to run once
 {
+        pinMode(PRINTBED, INPUT_PULLUP);
+        pinMode(CONFIRMBTN, INPUT_PULLUP);
 
-        pinMode(PRINTER, INPUT_PULLUP);
-        pinMode(CONFIRM, INPUT_PULLUP);
-
-        pinMode(D7, OUTPUT);
-        pinMode(A5, OUTPUT);
+        pinMode(PUBLISHLED, OUTPUT);
+        pinMode(CONFIRMLED, OUTPUT);
 
         Serial.begin(115200);
 
@@ -29,62 +25,33 @@ void setup() // Put setup code here to run once
 
 void loop() // Put code here to loop forever
 {
-        digitalWrite(A5, confirmState);
+        digitalWrite(CONFIRMLED, confirmState);
 
-        if (digitalRead(CONFIRM) == LOW)
+        if (digitalRead(CONFIRMBTN) == LOW)
         {
                 confirmState = !confirmState;
                 delay(250);
         }
 
-
-        if (digitalRead(PRINTER) == LOW && confirmState == true)
+        if (digitalRead(PRINTBED) == LOW && confirmState == true)
         {
           bool tempState = true;
 
                 if (Particle.connected() && confirmState == true)
                 {
                         Serial.print("Button is: ");
-                        Serial.println(digitalRead(PRINTER));
+                        Serial.println(digitalRead(PRINTBED));
 
-                        if (digitalRead(PRINTER) == LOW)
+                        if (digitalRead(PRINTBED) == LOW)
                         {
-                          digitalWrite(D7, HIGH);
+                          digitalWrite(PUBLISHLED, HIGH);
                           Serial.println("Publishing...");
                           Particle.publish("print-done", "good", PRIVATE);
                           delay(3000);
                           tempState = false;
                         }
-
-
                 }
-                digitalWrite(D7, LOW);
+                digitalWrite(PUBLISHLED, LOW);
                 confirmState = tempState;
         }
-
-/*
-
-        if (printReading == LOW && printState == HIGH)
-        {
-                printState = LOW;
-                Serial.print("ON: ");
-                Serial.println(printState);
-
-                if (Particle.connected() && confirmState == true)
-                {
-                        Particle.publish("print_finished", "good", PRIVATE);
-                        confirmState = false;
-                }
-
-                delay(3000);
-        }
-        else if (printReading == HIGH && printState == LOW)
-        {
-                printState = HIGH;
-                Serial.print("OFF: ");
-                Serial.println(printState);
-                delay(100);
-        }
-
- */
 }
